@@ -1,0 +1,1512 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduSync — Smart Curriculum & Attendance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0f0f17;
+      --surface: #16161f;
+      --surface2: #1e1e2e;
+      --accent: #b8a9f5;
+      --accent2: #f5a9c8;
+      --accent3: #a9d4f5;
+      --amber: #f5d9a9;
+      --text: #e4e0f0;
+      --muted: #6e6a85;
+      --border: rgba(255, 255, 255, 0.06);
+      --card-glow: 0 0 48px rgba(184, 169, 245, 0.07);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5 {
+      font-family: 'Syne', sans-serif;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 999;
+      opacity: 0.5;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 52px;
+      background: rgba(15, 15, 23, 0.8);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+      letter-spacing: -0.5px;
+    }
+
+    .logo span {
+      color: var(--accent);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 36px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--text);
+    }
+
+    .nav-cta {
+      background: var(--accent);
+      color: #0f0f17;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .nav-cta:hover {
+      opacity: 0.85;
+      box-shadow: 0 4px 20px rgba(184, 169, 245, 0.3);
+    }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      pointer-events: none;
+    }
+
+    .orb1 {
+      width: 460px;
+      height: 460px;
+      background: rgba(184, 169, 245, 0.08);
+      top: -80px;
+      left: -100px;
+      animation: drift 14s ease-in-out infinite alternate;
+    }
+
+    .orb2 {
+      width: 340px;
+      height: 340px;
+      background: rgba(245, 169, 200, 0.07);
+      bottom: -60px;
+      right: -80px;
+      animation: drift 18s ease-in-out infinite alternate-reverse;
+    }
+
+    .orb3 {
+      width: 260px;
+      height: 260px;
+      background: rgba(169, 212, 245, 0.05);
+      top: 50%;
+      left: 55%;
+      transform: translate(-50%, -50%);
+      animation: softpulse 10s ease-in-out infinite;
+    }
+
+    @keyframes drift {
+      from {
+        transform: translate(0, 0);
+      }
+
+      to {
+        transform: translate(28px, 22px);
+      }
+    }
+
+    @keyframes softpulse {
+
+      0%,
+      100% {
+        opacity: 0.5;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      50% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.2);
+      }
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(184, 169, 245, 0.1);
+      border: 1px solid rgba(184, 169, 245, 0.2);
+      color: var(--accent);
+      padding: 6px 18px;
+      border-radius: 100px;
+      font-size: 0.78rem;
+      font-weight: 500;
+      margin-bottom: 28px;
+      letter-spacing: 0.5px;
+      animation: fadeUp 0.6s ease both;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.6rem, 5.5vw, 5rem);
+      font-weight: 800;
+      line-height: 1.07;
+      letter-spacing: -2px;
+      margin-bottom: 22px;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .hero h1 em {
+      font-style: normal;
+      color: transparent;
+      background: linear-gradient(130deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      max-width: 500px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      margin-bottom: 44px;
+      font-weight: 300;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #0f0f17;
+      padding: 13px 30px;
+      border-radius: 10px;
+      border: none;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(184, 169, 245, 0.3);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text);
+      padding: 13px 30px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.25s;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .btn-ghost:hover {
+      border-color: rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* SECTIONS */
+    section {
+      padding: 96px 52px;
+    }
+
+    .section-tag {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .section-title {
+      font-size: clamp(1.9rem, 3vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      line-height: 1.1;
+      margin-bottom: 14px;
+    }
+
+    .section-sub {
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 480px;
+      font-weight: 300;
+    }
+
+    /* DASHBOARD */
+    .dashboard-section {
+      display: grid;
+      grid-template-columns: 1fr 1.5fr;
+      gap: 64px;
+      align-items: center;
+      max-width: 1160px;
+      margin: 0 auto;
+    }
+
+    .dashboard-preview {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: var(--card-glow), 0 32px 64px rgba(0, 0, 0, 0.45);
+    }
+
+    .db-header {
+      background: var(--surface2);
+      padding: 13px 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .db-dots {
+      display: flex;
+      gap: 5px;
+    }
+
+    .db-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+    }
+
+    .db-dot:nth-child(1) {
+      background: #ff5f57;
+    }
+
+    .db-dot:nth-child(2) {
+      background: #febc2e;
+    }
+
+    .db-dot:nth-child(3) {
+      background: #28c840;
+    }
+
+    .db-label {
+      font-size: 0.76rem;
+      color: var(--muted);
+      font-weight: 500;
+      margin-left: 6px;
+    }
+
+    .db-body {
+      padding: 16px;
+    }
+
+    .db-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 9px;
+      margin-bottom: 12px;
+    }
+
+    .db-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .db-card-label {
+      font-size: 0.63rem;
+      color: var(--muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .db-card-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.45rem;
+      font-weight: 800;
+    }
+
+    .db-chart {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 13px;
+      margin-bottom: 11px;
+    }
+
+    .db-chart-title {
+      font-size: 0.66rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
+
+    .bar-group {
+      display: flex;
+      align-items: flex-end;
+      gap: 5px;
+      height: 56px;
+    }
+
+    .bar {
+      flex: 1;
+      border-radius: 4px 4px 0 0;
+    }
+
+    .bar.b1 {
+      background: var(--accent);
+      height: 82%;
+      opacity: 0.75;
+    }
+
+    .bar.b2 {
+      background: var(--accent2);
+      height: 58%;
+      opacity: 0.65;
+    }
+
+    .bar.b3 {
+      background: var(--accent);
+      height: 93%;
+      opacity: 0.75;
+    }
+
+    .bar.b4 {
+      background: var(--accent2);
+      height: 44%;
+      opacity: 0.65;
+    }
+
+    .bar.b5 {
+      background: var(--accent);
+      height: 70%;
+      opacity: 0.75;
+    }
+
+    .bar.b6 {
+      background: var(--accent2);
+      height: 85%;
+      opacity: 0.65;
+    }
+
+    .bar.b7 {
+      background: var(--accent);
+      height: 52%;
+      opacity: 0.75;
+    }
+
+    .db-list {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .db-list-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 9px 11px;
+    }
+
+    .db-avatar {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.58rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .av1 {
+      background: rgba(184, 169, 245, 0.18);
+      color: var(--accent);
+    }
+
+    .av2 {
+      background: rgba(245, 169, 200, 0.18);
+      color: var(--accent2);
+    }
+
+    .av3 {
+      background: rgba(169, 212, 245, 0.18);
+      color: var(--accent3);
+    }
+
+    .db-name {
+      flex: 1;
+      font-weight: 500;
+      font-size: 0.76rem;
+    }
+
+    .db-progress {
+      flex: 1;
+      height: 3px;
+      background: var(--surface2);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .db-progress-fill {
+      height: 100%;
+      border-radius: 2px;
+    }
+
+    .db-pct {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.78rem;
+    }
+
+    /* FEATURES */
+    .features-wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+    }
+
+    .features-intro {
+      margin-bottom: 52px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 26px;
+      transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .fc-a::before {
+      background: linear-gradient(90deg, var(--accent), transparent);
+    }
+
+    .fc-b::before {
+      background: linear-gradient(90deg, var(--accent2), transparent);
+    }
+
+    .fc-c::before {
+      background: linear-gradient(90deg, var(--accent3), transparent);
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.35);
+    }
+
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+
+    .feature-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      margin-bottom: 16px;
+    }
+
+    .fi-a {
+      background: rgba(184, 169, 245, 0.12);
+    }
+
+    .fi-b {
+      background: rgba(245, 169, 200, 0.12);
+    }
+
+    .fi-c {
+      background: rgba(169, 212, 245, 0.12);
+    }
+
+    .fi-d {
+      background: rgba(245, 217, 169, 0.12);
+    }
+
+    .feature-card h3 {
+      font-size: 0.98rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.65;
+      font-weight: 300;
+    }
+
+    /* HOW IT WORKS */
+    .how-wrap {
+      max-width: 1000px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      margin-top: 52px;
+      position: relative;
+    }
+
+    .steps::before {
+      content: '';
+      position: absolute;
+      top: 25px;
+      left: 12.5%;
+      right: 12.5%;
+      height: 1px;
+      background: var(--border);
+      z-index: 0;
+    }
+
+    .step {
+      padding: 0 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-num {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--surface);
+      border: 1px solid rgba(184, 169, 245, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Syne', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 800;
+      margin: 0 auto 16px;
+      color: var(--accent);
+    }
+
+    .step h4 {
+      font-size: 0.92rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .step p {
+      color: var(--muted);
+      font-size: 0.82rem;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+
+    /* ATTENDANCE */
+    .attendance-section {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 64px;
+      align-items: center;
+      max-width: 1160px;
+      margin: 0 auto;
+    }
+
+    .attendance-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px;
+      box-shadow: var(--card-glow);
+    }
+
+    .ac-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 22px;
+    }
+
+    .ac-title {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .ac-badge {
+      background: rgba(184, 169, 245, 0.1);
+      color: var(--accent);
+      padding: 3px 12px;
+      border-radius: 100px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 5px;
+      margin-bottom: 20px;
+    }
+
+    .cal-day-label {
+      text-align: center;
+      font-size: 0.58rem;
+      color: var(--muted);
+      padding: 3px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    .cal-day {
+      aspect-ratio: 1;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.66rem;
+      font-weight: 500;
+      cursor: default;
+      transition: transform 0.15s;
+    }
+
+    .cal-day:hover {
+      transform: scale(1.1);
+    }
+
+    .cal-present {
+      background: rgba(184, 169, 245, 0.18);
+      color: var(--accent);
+    }
+
+    .cal-absent {
+      background: rgba(245, 169, 200, 0.18);
+      color: var(--accent2);
+    }
+
+    .cal-late {
+      background: rgba(245, 217, 169, 0.18);
+      color: var(--amber);
+    }
+
+    .cal-empty {
+      color: var(--muted);
+      opacity: 0.25;
+    }
+
+    .cal-today {
+      background: var(--accent);
+      color: #0f0f17;
+      font-weight: 800;
+      box-shadow: 0 0 10px rgba(184, 169, 245, 0.45);
+    }
+
+    .ac-legend {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .legend-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    .ac-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 9px;
+    }
+
+    .ac-sum-item {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .ac-sum-num {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800;
+      font-size: 1.35rem;
+    }
+
+    .ac-sum-label {
+      font-size: 0.66rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    /* AI */
+    .ai-section {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 64px;
+      align-items: center;
+      max-width: 1160px;
+      margin: 0 auto;
+    }
+
+    .ai-card {
+      background: linear-gradient(135deg, rgba(184, 169, 245, 0.06), rgba(245, 169, 200, 0.04));
+      border: 1px solid rgba(184, 169, 245, 0.14);
+      border-radius: 18px;
+      padding: 32px;
+    }
+
+    .ai-card-title {
+      font-size: 0.7rem;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .ai-insight {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      padding: 13px;
+      margin-bottom: 9px;
+      display: flex;
+      gap: 11px;
+      align-items: flex-start;
+      transition: border-color 0.2s;
+    }
+
+    .ai-insight:last-child {
+      margin-bottom: 0;
+    }
+
+    .ai-insight:hover {
+      border-color: rgba(184, 169, 245, 0.18);
+    }
+
+    .ai-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: rgba(184, 169, 245, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+
+    .ai-insight h5 {
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 2px;
+    }
+
+    .ai-insight p {
+      font-size: 0.74rem;
+      color: var(--muted);
+      font-weight: 300;
+    }
+
+    /* CTA */
+    .cta-section {
+      max-width: 660px;
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+    }
+
+    .cta-glow {
+      position: absolute;
+      width: 480px;
+      height: 220px;
+      background: radial-gradient(ellipse, rgba(184, 169, 245, 0.07), transparent 70%);
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+
+    .cta-section h2 {
+      font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .cta-section p {
+      color: var(--muted);
+      font-size: 1rem;
+      margin-bottom: 32px;
+      position: relative;
+      font-weight: 300;
+    }
+
+    .cta-actions {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 44px 52px;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 48px;
+    }
+
+    .footer-brand .logo {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+    }
+
+    .footer-brand p {
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 300;
+      max-width: 230px;
+      line-height: 1.7;
+    }
+
+    .footer-col h5 {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-bottom: 13px;
+    }
+
+    .footer-col ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
+    .footer-col ul a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.82rem;
+      transition: color 0.2s;
+    }
+
+    .footer-col ul a:hover {
+      color: var(--text);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid var(--border);
+      padding: 20px 52px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.77rem;
+    }
+
+    /* REVEAL */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 900px) {
+      nav {
+        padding: 16px 24px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      section {
+        padding: 64px 24px;
+      }
+
+      .dashboard-section,
+      .attendance-section,
+      .ai-section {
+        grid-template-columns: 1fr;
+        gap: 36px;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .steps {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 28px;
+      }
+
+      .steps::before {
+        display: none;
+      }
+
+      footer {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .footer-bottom {
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+        padding: 20px 24px;
+      }
+    }
+
+    @media (max-width: 600px) {
+
+      .features-grid,
+      .steps,
+      footer {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">Edu<span>Sync</span></div>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How it Works</a></li>
+      <li><a href="#attendance">Attendance</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <button class="nav-cta">Get Started</button>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="orb orb1"></div>
+    <div class="orb orb2"></div>
+    <div class="orb orb3"></div>
+    <div class="hero-badge">✦ Smart Education Platform</div>
+    <h1>Curriculum &amp; <em>Attendance</em><br>made effortless</h1>
+    <p class="hero-sub">Track attendance, manage curriculum activities, and get AI-driven insights — all in one clean
+      platform built for educators.</p>
+    <div class="hero-actions">
+      <a href="#features" class="btn-primary">Explore Features</a>
+      <a href="#attendance" class="btn-ghost">See it in action →</a>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section id="features">
+    <div class="dashboard-section">
+      <div class="reveal">
+        <span class="section-tag">Live Dashboard</span>
+        <h2 class="section-title">Everything in<br>one place</h2>
+        <p class="section-sub">A clean dashboard showing attendance, activity progress, and student highlights — updated
+          in real time.</p>
+        <br><br>
+        <a href="#" class="btn-primary">View Demo</a>
+      </div>
+      <div class="dashboard-preview reveal">
+        <div class="db-header">
+          <div class="db-dots">
+            <div class="db-dot"></div>
+            <div class="db-dot"></div>
+            <div class="db-dot"></div>
+          </div>
+          <div class="db-label">EduSync — Class 10B Overview</div>
+        </div>
+        <div class="db-body">
+          <div class="db-grid">
+            <div class="db-card">
+              <div class="db-card-label">Present Today</div>
+              <div class="db-card-value" style="color:var(--accent)">38 / 42</div>
+            </div>
+            <div class="db-card">
+              <div class="db-card-label">Activities Done</div>
+              <div class="db-card-value" style="color:var(--accent2)">7 / 9</div>
+            </div>
+            <div class="db-card">
+              <div class="db-card-label">Alerts</div>
+              <div class="db-card-value" style="color:var(--amber)">3</div>
+            </div>
+            <div class="db-card">
+              <div class="db-card-label">Avg Score</div>
+              <div class="db-card-value" style="color:var(--accent3)">84%</div>
+            </div>
+          </div>
+          <div class="db-chart">
+            <div class="db-chart-title">WEEKLY ATTENDANCE vs ACTIVITY COMPLETION</div>
+            <div class="bar-group">
+              <div class="bar b1"></div>
+              <div class="bar b2"></div>
+              <div class="bar b3"></div>
+              <div class="bar b4"></div>
+              <div class="bar b5"></div>
+              <div class="bar b6"></div>
+              <div class="bar b7"></div>
+            </div>
+          </div>
+          <div class="db-list">
+            <div class="db-list-item">
+              <div class="db-avatar av1">AK</div>
+              <div class="db-name">Ananya Krishnan</div>
+              <div class="db-progress">
+                <div class="db-progress-fill" style="width:92%;background:var(--accent)"></div>
+              </div>
+              <div class="db-pct" style="color:var(--accent)">92%</div>
+            </div>
+            <div class="db-list-item">
+              <div class="db-avatar av2">AB</div>
+              <div class="db-name">Ankit Badole</div>
+              <div class="db-progress">
+                <div class="db-progress-fill" style="width:61%;background:var(--accent2)"></div>
+              </div>
+              <div class="db-pct" style="color:var(--accent2)">61%</div>
+            </div>
+            <div class="db-list-item">
+              <div class="db-avatar av3">PM</div>
+              <div class="db-name">Priya Mehta</div>
+              <div class="db-progress">
+                <div class="db-progress-fill" style="width:34%;background:var(--accent3)"></div>
+              </div>
+              <div class="db-pct" style="color:var(--accent3)">34%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+    <div class="features-wrap reveal">
+      <div class="features-intro">
+        <span class="section-tag">Core Features</span>
+        <h2 class="section-title">Built for modern educators</h2>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card fc-a">
+          <div class="feature-icon fi-a">📡</div>
+          <h3>Real-Time Attendance</h3>
+          <p>Mark attendance via QR codes or manual entry. Instant parent notifications and daily reports generated
+            automatically.</p>
+        </div>
+        <div class="feature-card fc-b">
+          <div class="feature-icon fi-b">📚</div>
+          <h3>Curriculum Planner</h3>
+          <p>Plan lessons, assign activities, and track completion per student aligned to academic standards.</p>
+        </div>
+        <div class="feature-card fc-c">
+          <div class="feature-icon fi-c">🤖</div>
+          <h3>AI Insights</h3>
+          <p>Flag at-risk learners, detect attendance gaps, and receive smart recommendations automatically.</p>
+        </div>
+        <div class="feature-card fc-a">
+          <div class="feature-icon fi-d">📊</div>
+          <h3>Performance Analytics</h3>
+          <p>Visual charts and trend reports for individual students and the whole class — export with one click.</p>
+        </div>
+        <div class="feature-card fc-b">
+          <div class="feature-icon fi-a">💬</div>
+          <h3>Parent Communication</h3>
+          <p>Automated absence alerts and a parent portal for full visibility into their child's progress.</p>
+        </div>
+        <div class="feature-card fc-c">
+          <div class="feature-icon fi-b">🗓️</div>
+          <h3>Schedule Management</h3>
+          <p>Visual timetable builder with conflict detection to manage your entire school schedule simply.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section id="how">
+    <div class="how-wrap">
+      <div class="reveal">
+        <span class="section-tag">How It Works</span>
+        <h2 class="section-title">Up and running in minutes</h2>
+      </div>
+      <div class="steps reveal">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h4>Setup Your School</h4>
+          <p>Import classes, teachers, and student rosters via CSV or Google Classroom sync.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h4>Configure Curriculum</h4>
+          <p>Define subjects, chapters, and learning activities mapped to your academic calendar.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h4>Track Daily</h4>
+          <p>Teachers mark attendance and log activity completions. Everything syncs instantly.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <h4>Act on Insights</h4>
+          <p>Review AI reports and make data-driven decisions to improve student outcomes.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATTENDANCE -->
+  <section id="attendance"
+    style="background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+    <div class="attendance-section">
+      <div class="attendance-card reveal">
+        <div class="ac-header">
+          <div class="ac-title">Monthly Attendance — Ankit Badole</div>
+          <div class="ac-badge">March 2026</div>
+        </div>
+        <div class="calendar-grid">
+          <div class="cal-day-label">SUN</div>
+          <div class="cal-day-label">MON</div>
+          <div class="cal-day-label">TUE</div>
+          <div class="cal-day-label">WED</div>
+          <div class="cal-day-label">THU</div>
+          <div class="cal-day-label">FRI</div>
+          <div class="cal-day-label">SAT</div>
+          <div class="cal-day cal-empty"></div>
+          <div class="cal-day cal-empty"></div>
+          <div class="cal-day cal-empty"></div>
+          <div class="cal-day cal-empty"></div>
+          <div class="cal-day cal-empty"></div>
+          <div class="cal-day cal-empty"></div>
+          <div class="cal-day cal-empty">1</div>
+          <div class="cal-day cal-empty">2</div>
+          <div class="cal-day cal-present">3</div>
+          <div class="cal-day cal-present">4</div>
+          <div class="cal-day cal-late">5</div>
+          <div class="cal-day cal-present">6</div>
+          <div class="cal-day cal-present">7</div>
+          <div class="cal-day cal-empty">8</div>
+          <div class="cal-day cal-empty">9</div>
+          <div class="cal-day cal-absent">10</div>
+          <div class="cal-day cal-present">11</div>
+          <div class="cal-day cal-present">12</div>
+          <div class="cal-day cal-late">13</div>
+          <div class="cal-day cal-present">14</div>
+          <div class="cal-day cal-empty">15</div>
+          <div class="cal-day cal-empty">16</div>
+          <div class="cal-day cal-present">17</div>
+          <div class="cal-day cal-present">18</div>
+          <div class="cal-day cal-absent">19</div>
+          <div class="cal-day cal-present">20</div>
+          <div class="cal-day cal-present">21</div>
+          <div class="cal-day cal-empty">22</div>
+          <div class="cal-day cal-empty">23</div>
+          <div class="cal-day cal-present">24</div>
+          <div class="cal-day cal-present">25</div>
+          <div class="cal-day cal-present">26</div>
+          <div class="cal-day cal-present">27</div>
+          <div class="cal-day cal-today">28</div>
+          <div class="cal-day cal-empty">29</div>
+          <div class="cal-day cal-empty">30</div>
+          <div class="cal-day cal-empty">31</div>
+          <div class="cal-day cal-empty"></div>
+          <div class="cal-day cal-empty"></div>
+          <div class="cal-day cal-empty"></div>
+          <div class="cal-day cal-empty"></div>
+          <div class="cal-day cal-empty"></div>
+        </div>
+        <div class="ac-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--accent)"></div>Present
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--accent2)"></div>Absent
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--amber)"></div>Late
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--accent);box-shadow:0 0 6px rgba(184,169,245,0.55)"></div>
+            Today
+          </div>
+        </div>
+        <div class="ac-summary">
+          <div class="ac-sum-item">
+            <div class="ac-sum-num" style="color:var(--accent)">18</div>
+            <div class="ac-sum-label">Present</div>
+          </div>
+          <div class="ac-sum-item">
+            <div class="ac-sum-num" style="color:var(--accent2)">2</div>
+            <div class="ac-sum-label">Absent</div>
+          </div>
+          <div class="ac-sum-item">
+            <div class="ac-sum-num" style="color:var(--amber)">2</div>
+            <div class="ac-sum-label">Late</div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal">
+        <span class="section-tag">Attendance Tracking</span>
+        <h2 class="section-title">Know who's in<br>every day</h2>
+        <p class="section-sub">Visual, calendar-based tracking with colour-coded statuses. Spot patterns before they
+          become problems.</p>
+        <br><br>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div
+              style="width:32px;height:32px;background:rgba(184,169,245,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              📲</div>
+            <p style="font-size:0.87rem;color:var(--muted);">Instant alerts to parents on absence</p>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div
+              style="width:32px;height:32px;background:rgba(245,169,200,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              ⚠️</div>
+            <p style="font-size:0.87rem;color:var(--muted);">Auto-flag students below monthly threshold</p>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;">
+            <div
+              style="width:32px;height:32px;background:rgba(245,217,169,0.1);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              📁</div>
+            <p style="font-size:0.87rem;color:var(--muted);">Export reports as PDF or Excel instantly</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI -->
+  <section>
+    <div class="ai-section">
+      <div class="reveal">
+        <span class="section-tag">AI Intelligence</span>
+        <h2 class="section-title">Your AI teaching<br>assistant</h2>
+        <p class="section-sub">EduSync continuously analyses attendance and activity data to surface insights you'd
+          otherwise miss.</p>
+      </div>
+      <div class="ai-card reveal">
+        <div class="ai-card-title">AI Insights — Live</div>
+        <div class="ai-insight">
+          <div class="ai-icon">🔴</div>
+          <div>
+            <h5>Attendance Risk Detected</h5>
+            <p>Priya Mehta has 3 consecutive absences and declining scores. Counselor follow-up suggested.</p>
+          </div>
+        </div>
+        <div class="ai-insight">
+          <div class="ai-icon">📈</div>
+          <div>
+            <h5>Curriculum Gap Identified</h5>
+            <p>Chapter 7 (Trigonometry) completion is below average. Consider revisiting the topic.</p>
+          </div>
+        </div>
+        <div class="ai-insight">
+          <div class="ai-icon">✅</div>
+          <div>
+            <h5>Top Performer Trend</h5>
+            <p>Ananya Krishnan has maintained excellent attendance for 6 consecutive weeks.</p>
+          </div>
+        </div>
+        <div class="ai-insight">
+          <div class="ai-icon">🗓️</div>
+          <div>
+            <h5>Schedule Suggestion</h5>
+            <p>Attendance tends to dip on Friday afternoons — moving assessments to Thursday may help.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section style="background:var(--surface);border-top:1px solid var(--border);" id="contact">
+    <div class="cta-section reveal">
+      <div class="cta-glow"></div>
+      <h2>Ready to transform<br>your school?</h2>
+      <p>Simple setup. No training required. Start for free.</p>
+      <div class="cta-actions">
+        <a href="#" class="btn-primary">Get Started Free</a>
+        <a href="#" class="btn-ghost">Schedule a Demo</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-brand">
+      <div class="logo">Edu<span>Sync</span></div>
+      <p>Smart curriculum management and attendance tracking. Built for educators who care about outcomes.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Product</h5>
+      <ul>
+        <li><a href="#">Features</a></li>
+        <li><a href="#">Changelog</a></li>
+        <li><a href="#">Roadmap</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Resources</h5>
+      <ul>
+        <li><a href="#">Documentation</a></li>
+        <li><a href="#">Status</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+      </ul>
+    </div>
+  </footer>
+  <div class="footer-bottom">
+    <span>© 2026 EduSync. All rights reserved.</span>
+    <span>Made with ♥ for educators everywhere</span>
+  </div>
+
+  <script>
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    reveals.forEach(el => observer.observe(el));
+  </script>
+</body>
+
+</html>
